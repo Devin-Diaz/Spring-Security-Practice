@@ -1,8 +1,11 @@
 package com.diaz.springsecuritypractice.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -42,9 +45,23 @@ import org.springframework.security.web.SecurityFilterChain;
 
     InMemoryUserDetailsManager - manages user details in memory. This makes it a straightforward and convenient option
     for managing user information without the need for external storage systems like databases.
+
+    CSRF - Cross-Site-Request-Forgery - CSRF is an attack that tricks an authenticated user into executing unwanted
+    actions on a web application. On by default in Spring Boot, however we may want to disable this for specific
+    endpoints. Some examples would be for endpoints with safe HTTP requests such as GET, HEAD, OPTIONS, TRACE. These
+    HTTP requests don't change the state of the application like a PUT request would where data is changed or updated
+    which are more vulnerable to CSRF attacks.
+
+    @EnableMethodSecurity - Allows us to use the @PreAuthorize annotation in our controller class on functions that
+    handle endpoints. This allows us to restrict which users are allowed at certain endpoints via authentication.
+    For when testing head back to the /login page to ensure you change to correct user because in memory the endpoint
+    will recognize a failed login and stay at that point unless a new user manually logs in.
+
+    START POINT ON VIDEO 27:39
 */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -54,15 +71,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    //Authentication
+    //Authentication,
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         UserDetails admin = User.withUsername("Devin")
-                .password(encoder.encode("Olivia_rodrigo7!"))
+                .password(encoder.encode("passwd1"))
                 .roles("ADMIN")
                 .build();
 
         UserDetails user = User.withUsername("Isagi")
-                .password(encoder.encode("Im_simply_better10!"))
+                .password(encoder.encode("passwd2"))
                 .roles("USER")
                 .build();
 
@@ -71,8 +88,25 @@ public class SecurityConfig {
 
     @Bean
     //Chain of responsibility
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        return null;
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        // Configuration to specify security rules for URL access within the application
+
+                        /* Grants public access to the welcome page, allowing anyone to access it
+                           without needing to log in */
+                        .requestMatchers("/products/welcome").permitAll()
+
+                        /* Requires that users must be authenticated to access any other endpoints under the
+                          '/products' path, except for the welcome page This ensures that for URLs matching
+                          '/products/**', a user must have the appropriate authentication to access those resources */
+                        .requestMatchers("/products/**").authenticated()
+                )
+                // will display default spring login page for users that need to be authenticated for certain endpoints
+                .formLogin(Customizer.withDefaults());
+
+        return http.build();
     }
 
 }
