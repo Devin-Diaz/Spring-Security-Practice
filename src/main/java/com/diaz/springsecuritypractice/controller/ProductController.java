@@ -2,6 +2,7 @@ package com.diaz.springsecuritypractice.controller;
 import com.diaz.springsecuritypractice.dto.Product;
 import com.diaz.springsecuritypractice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,11 @@ profile there has it's designated url with our username at the end. In this case
 variable. EG: http://linkedin.com/diazdevin  {diazdevin} -> PathVariable. The data returned would be my profile
 specifically.
 
+@PreAuthorize() - specifies what permissions (roles) an authenticated user needs to access the endpoint
+associated with the function annotated with PreAuthorize. However, this won't happen automatically, we must
+specify to Spring Security what we are trying to do on a method level. Must enable @EnableMethodSecurity annotation
+on Security Config class.
+
 */
 
 @RestController
@@ -54,12 +60,14 @@ public class ProductController {
 
     // return all random objects created in service class in JSON format
     @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public List<Product> getAllTheProducts() {
         return service.getAllProducts();
     }
 
     // allows us to target a specific project and return it's JSON data
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public Product getProductById(@PathVariable int id) {
         return service.getProduct(id);
     }
