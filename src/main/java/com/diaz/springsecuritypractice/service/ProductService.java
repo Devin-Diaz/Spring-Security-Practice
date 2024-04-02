@@ -15,6 +15,10 @@ import java.util.stream.IntStream;
     machine analogy, once the machine is powered on, we must initialize default settings before we begin brewing
     coffee. In this case @PostConstruct is the initialization of settings before brewing coffee. A function
     annotated with @PostConstruct will execute after a bean's construction and dependency injection are complete.
+
+    With a refreshed brain @PostConstruct ensures that the spring application is completely built and running
+    before it executes the orders in the function it's annotated with. We want all features of the application
+    ready for use before doing the action.
 */
 
 
