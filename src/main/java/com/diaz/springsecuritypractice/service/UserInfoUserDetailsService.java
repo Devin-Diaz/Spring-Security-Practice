@@ -37,9 +37,27 @@ public class UserInfoUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        /*
+        Example:
+        In a scenario where user details are manually created, it would resemble:
+
+            UserDetails user = User.withUsername("username")
+            .password(encoder.encode("password"))
+            .roles("ROLE_USER")
+            .build();
+
+        This example illustrates the manual creation of a UserDetails object, which is similar
+        to what happens internally when a user is found. However, this method automates the retrieval and
+        construction based on the persisted user data.
+        Think of it like this, prior the developer had to manually create each user and it's roles, now this can be
+        done with persisted data from our DB essentially automating the process and all the boilerplate code from above
+        */
+
         Optional<UserInfo> userInfo = userInfoRepository.findByName(username);
 
         return userInfo.map(UserInfoUserDetails::new)
                 .orElseThrow(() ->  new UsernameNotFoundException("USER NOT FOUND!"));
+
     }
 }
