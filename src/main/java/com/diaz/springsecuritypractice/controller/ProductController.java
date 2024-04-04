@@ -1,16 +1,12 @@
 package com.diaz.springsecuritypractice.controller;
 import com.diaz.springsecuritypractice.dto.Product;
+import com.diaz.springsecuritypractice.entity.UserInfo;
 import com.diaz.springsecuritypractice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-
 
 /*
 @RestController - specialized version of @Controller, used at class level and marks the class where every method
@@ -41,6 +37,21 @@ associated with the function annotated with PreAuthorize. However, this won't ha
 specify to Spring Security what we are trying to do on a method level. Must enable @EnableMethodSecurity annotation
 on Security Config class.
 
+@RequestBody - Facilitates the easy creation of RESTful services by enabling automatic mapping request bodies onto
+Java objects, steamlining the process of data injection from clients to your server-side application logic. When a
+client sends a request to a server, the HTTP request can contain a body. Essentially on our request we would input data
+in a (JSON or XML) format, and Spring uses HTTP message converters to convert that body of data into a Java object.
+We would use a software like Postman to do this.
+
+E.g:
+    JSON {
+        name: devin
+        passwd: dab
+        roles: admin
+    }
+    ===
+    User user = new User("Devin", "dab", admin)
+
 */
 
 @RestController
@@ -51,11 +62,18 @@ public class ProductController {
     @Autowired
     private ProductService service;
 
-
     // localhost:8080/products/welcome -> this in browser will display method GET request
     @GetMapping("/welcome")
     public String welcome() {
         return "Welcome, this endpoint isn't secure";
+    }
+
+    // POST HTTP request bc/ we are adding new data "ordering from the menu"
+    // method that persists new users data to the DB and will store hashed password
+    // note that we want ALL users to reach this endpoint, no authentication is needed, so we configure in filter chain
+    @PostMapping("/new")
+    public String addNewUser(@RequestBody UserInfo userInfo) {
+        return service.addUserInfo(userInfo);
     }
 
     // return all random objects created in service class in JSON format
