@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 /*
     This is very correlated with our UserInfoUserDetailsService class. Now we are working on the customization of the
     UserDetails interface. This is the type that we are going to return in our loadUserByUsername() method from the
-    UserDetailsService interface.
+    UserDetailsService interface, so we can authenticate users and their roles via persistence data from DB.
+
+    SimpleGrantedAuthority -  objects are used because they provide a simple, straightforward way to represent user
+    roles in a manner that is fully compatible with Spring Security's authorization mechanisms.
 */
 
 
@@ -23,7 +26,6 @@ public class UserInfoUserDetails implements UserDetails {
         Constructor and fields, when we loadUserByUsername, this is the UserDetails objects that we will return,
         the data in this class is what Spring Security will recognize upon retrieving an entity from database
     */
-
     private String name;
     private String password;
     private List<GrantedAuthority> authorityList;
