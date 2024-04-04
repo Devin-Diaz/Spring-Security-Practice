@@ -1,6 +1,6 @@
 # Spring Security User and Product Project
 
-A simple project designed to showcase the functionalities of security and authentication using Spring Boot and Spring Security. This example uses Spring Security version 3.0, considering the deprecation of features in previous versions.
+A simple well-documented project designed to showcase the functionalities of security and authentication using Spring Boot and Spring Security. This example uses Spring Security version 3.0, considering the deprecation of features in previous versions.
 
 ## Features
 
