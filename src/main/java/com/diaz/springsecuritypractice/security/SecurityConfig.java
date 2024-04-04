@@ -2,6 +2,8 @@ package com.diaz.springsecuritypractice.security;
 import com.diaz.springsecuritypractice.service.UserInfoUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -55,7 +57,9 @@ import org.springframework.security.web.SecurityFilterChain;
     For when testing head back to the /login page to ensure you change to correct user because in memory the endpoint
     will recognize a failed login and stay at that point unless a new user manually logs in.
 
-    START POINT ON VIDEO 27:39
+    DaoAuthenticationProvider - This is a specific type of AuthenticationProvider that uses a Data Access Object (DAO)
+    to retrieve user details from your database (or another persistence mechanism).
+
 */
 @Configuration
 @EnableWebSecurity
@@ -70,7 +74,7 @@ public class SecurityConfig {
 
     @Bean
     //Custom implementation of authentication with UserInfo entities
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+    public UserDetailsService userDetailsService() {
         return new UserInfoUserDetailsService();
     }
 
@@ -84,7 +88,7 @@ public class SecurityConfig {
 
                         /* Grants public access to the welcome page, allowing anyone to access it
                            without needing to log in */
-                        .requestMatchers("/products/welcome").permitAll()
+                        .requestMatchers("/products/welcome", "/products/new").permitAll()
 
                         /* Requires that users must be authenticated to access any other endpoints under the
                           '/products' path, except for the welcome page This ensures that for URLs matching
@@ -97,8 +101,18 @@ public class SecurityConfig {
         return http.build();
     }
 
-}
+    /* When a user tries to log in, this configuration ensures that, the application will use your UserDetailsService
+    to fetch user details from the specified source (like a database).  this method is your way of telling Spring
+    Security exactly how to authenticate users, including where to get user details and how to handle passwords. */
+    @Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider= new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
 
+}
 
 /*
 
