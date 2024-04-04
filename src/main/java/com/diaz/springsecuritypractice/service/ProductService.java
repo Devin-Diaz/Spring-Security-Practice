@@ -1,6 +1,10 @@
 package com.diaz.springsecuritypractice.service;
 import com.diaz.springsecuritypractice.dto.Product;
+import com.diaz.springsecuritypractice.entity.UserInfo;
+import com.diaz.springsecuritypractice.repository.UserInfoRepository;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +25,19 @@ import java.util.stream.IntStream;
     ready for use before doing the action.
 */
 
-
-
 @Service
 public class ProductService {
 
     List<Product> product_list = null;
 
-    //Utilizing @Builder to create 99 instances of product object with ordered numbering and random qty and prices
+    //injected dependencies to persist data and hash passwords
+    @Autowired
+    private UserInfoRepository userInfoRepository;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
+    //Create 99 instances of product object with ordered numbering and random qty and prices
     //We used Java streaming to do this however it can be done with a traditional for loop as well.
     @PostConstruct
     public void loadProductsFromDb() {
@@ -53,6 +62,13 @@ public class ProductService {
                 .filter(product -> product.getProductId() == id)
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Product with id: " + id + " not found"));
+    }
+
+    // method that hashes and persists data to our DB
+    public String addUserInfo(UserInfo userInfo) {
+        userInfo.setPassword(encoder.encode(userInfo.getPassword()));
+        userInfoRepository.save(userInfo);
+        return "user added to the system";
     }
 
 }
